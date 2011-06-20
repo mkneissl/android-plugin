@@ -6,12 +6,12 @@ import Process._
 trait Startable extends Installable {
 
   lazy val startDevice = startDeviceAction
-  def startDeviceAction = startTask(false) dependsOn(reinstallDevice) describedAs("Start package on device after installation")
+  def startDeviceAction = startTask(device) dependsOn(reinstallDevice) describedAs("Start package on device after installation")
 
   lazy val startEmulator = startEmulatorAction
-  def startEmulatorAction = startTask(true) dependsOn(reinstallEmulator) describedAs("Start package on emulator after installation")
+  def startEmulatorAction = startTask(Emulator) dependsOn(reinstallEmulator) describedAs("Start package on emulator after installation")
 
-  def startTask(emulator: Boolean) = adbTask(emulator, "shell am start -a android.intent.action.MAIN -n "+manifestPackage+"/"+launcherActivity)
+  def startTask(executionTarget: ExecutionTarget) = adbTask(executionTarget, "shell am start -a android.intent.action.MAIN -n "+manifestPackage+"/"+launcherActivity)
 
   def launcherActivity:String = {
     for (activity <- (manifest \\ "activity")) {

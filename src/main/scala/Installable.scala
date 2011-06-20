@@ -6,26 +6,26 @@ import Process._
 trait Installable extends BaseAndroidProject {
 
   lazy val installEmulator = installEmulatorAction
-  def installEmulatorAction = installTask(true) dependsOn(packageDebug) describedAs("Install package on the default emulator.")
+  def installEmulatorAction = installTask(Emulator) dependsOn(packageDebug) describedAs("Install package on the default emulator.")
 
   lazy val installDevice = installDeviceAction
-  def installDeviceAction = installTask(false) dependsOn(packageDebug) describedAs("Install package on the default device.")
+  def installDeviceAction = installTask(device) dependsOn(packageDebug) describedAs("Install package on the default device.")
 
   lazy val reinstallEmulator = reinstallEmulatorAction
-  def reinstallEmulatorAction = reinstallTask(true) dependsOn(packageDebug) describedAs("Reinstall package on the default emulator.")
+  def reinstallEmulatorAction = reinstallTask(Emulator) dependsOn(packageDebug) describedAs("Reinstall package on the default emulator.")
 
   lazy val reinstallDevice = reinstallDeviceAction
-  def reinstallDeviceAction = reinstallTask(false) dependsOn(packageDebug) describedAs("Reinstall package on the default device.")
+  def reinstallDeviceAction = reinstallTask(device) dependsOn(packageDebug) describedAs("Reinstall package on the default device.")
 
   lazy val uninstallEmulator = uninstallEmulatorAction
-  def uninstallEmulatorAction = uninstallTask(true) describedAs("Uninstall package on the default emulator.")
+  def uninstallEmulatorAction = uninstallTask(Emulator) describedAs("Uninstall package on the default emulator.")
 
   lazy val uninstallDevice = uninstallDeviceAction
-  def uninstallDeviceAction = uninstallTask(false) describedAs("Uninstall package on the default device.")
+  def uninstallDeviceAction = uninstallTask(device) describedAs("Uninstall package on the default device.")
 
-  def installTask(emulator: Boolean) = adbTask(emulator, "install "+packageApkPath.absolutePath)
-  def reinstallTask(emulator: Boolean) = adbTask(emulator, "install -r "+packageApkPath.absolutePath)
-  def uninstallTask(emulator: Boolean) = adbTask(emulator, "uninstall "+manifestPackage)
+  def installTask(executionTarget: ExecutionTarget) = adbTask(executionTarget, "install "+packageApkPath.absolutePath)
+  def reinstallTask(executionTarget: ExecutionTarget) = adbTask(executionTarget, "install -r "+packageApkPath.absolutePath)
+  def uninstallTask(executionTarget: ExecutionTarget) = adbTask(executionTarget, "uninstall "+manifestPackage)
 
   lazy val aaptPackage = aaptPackageAction
   def aaptPackageAction = aaptPackageTask dependsOn(dx) describedAs("Package resources and assets.")

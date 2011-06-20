@@ -19,6 +19,7 @@ object BaseAndroidProject {
   val DefaultDxJavaOpts = "-JXmx512m"
   val DefaultManifestSchema = "http://schemas.android.com/apk/res/android"
   val DefaultEnvs = List("ANDROID_SDK_HOME", "ANDROID_SDK_ROOT", "ANDROID_HOME")
+  val DefaultDevice = USBDevice
 }
 
 abstract class BaseAndroidProject(info: ProjectInfo) extends DefaultProject(info) {
@@ -47,6 +48,7 @@ abstract class BaseAndroidProject(info: ProjectInfo) extends DefaultProject(info
   def resourcesApkName = DefaultResourcesApkName
   def dxJavaOpts = DefaultDxJavaOpts
   def manifestSchema = DefaultManifestSchema
+  def device: ExecutionTarget = DefaultDevice
 
   lazy val androidSdkPath = determineAndroidSdkPath.getOrElse(error("Android SDK not found."+
             "You might need to set "+DefaultEnvs.mkString(" or ")))
@@ -146,8 +148,14 @@ abstract class BaseAndroidProject(info: ProjectInfo) extends DefaultProject(info
 
   override def compileAction = super.compileAction dependsOn(aaptGenerate, aidl)
 
-  def adbTask(emulator: Boolean, action: => String) = execTask {<x>
-      {adbPath.absolutePath} {if (emulator) "-e" else "-d"} {action}
+  def targetSwitches(executionTarget: ExecutionTarget): String = executionTarget match {
+    case Emulator => "-e"
+    case USBDevice => "-d"
+    case IdentifiedDevice(id) => "-s " + id
+  }
+
+  def adbTask(executionTarget: ExecutionTarget, action: => String) = execTask {<x>
+      {adbPath.absolutePath} {targetSwitches(executionTarget)} {action}
    </x>}
 
   lazy val manifest:scala.xml.Elem = scala.xml.XML.loadFile(androidManifestPath.asFile)
