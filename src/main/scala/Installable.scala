@@ -63,7 +63,7 @@ trait Installable extends BaseAndroidProject {
                             File.pathSeparator+proguardInJars.getPaths.map(_+"(!META-INF/MANIFEST.MF,!**/R.class,!**/R$*.class,!**/TR.class,!**/TR$*.class)").mkString(File.pathSeparator) else "") ::
              "-outjars" :: classesMinJarPath.absolutePath ::
              "-libraryjars" :: libraryJarPath.getPaths.mkString(File.pathSeparator) ::
-             "-dontwarn" :: "-dontoptimize" :: "-dontobfuscate" ::
+             "-dontwarn" :: proguardOptimization :: "-dontobfuscate" ::
              "-dontnote scala.Enumeration" ::
              "-dontnote org.xml.sax.EntityResolver" ::
              "-keep public class * extends android.app.Activity" ::
@@ -85,7 +85,7 @@ trait Installable extends BaseAndroidProject {
   def dxProguardTask = fileTask(classesDexPath from classesMinJarPath) {
      execTask {
       <x> {dxPath.absolutePath} {dxMemoryParameter}
-        --dex --output={classesDexPath.absolutePath} {classesMinJarPath.absolutePath}
+        --dex --no-locals --output={classesDexPath.absolutePath} {classesMinJarPath.absolutePath}
       </x>
      } run
   }

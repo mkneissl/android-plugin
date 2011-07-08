@@ -24,6 +24,7 @@ object BaseAndroidProject {
 
 abstract class BaseAndroidProject(info: ProjectInfo) extends DefaultProject(info) {
   def proguardOption = ""
+  def proguardOptimization = "-dontoptimize"
   def proguardInJars = runClasspath --- proguardExclude
   def proguardExclude = libraryJarPath +++ mainCompilePath +++ mainResourcesPath +++ managedClasspath(Configurations.Provided)
   def libraryJarPath = androidJarPath +++ addonsJarPath
