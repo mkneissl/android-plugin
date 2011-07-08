@@ -14,8 +14,7 @@ import javax.imageio.ImageIO
 trait DdmSupport extends BaseAndroidProject {
 
   lazy val bridge = {
-    AndroidDebugBridge.init(false)
-    Runtime.getRuntime().addShutdownHook(new Thread() { override def run() { AndroidDebugBridge.terminate() }})
+    DdmSupport.bridgeInit
     AndroidDebugBridge.createBridge(adbPath.absolutePath, false)
   }
 
@@ -91,5 +90,13 @@ trait DdmSupport extends BaseAndroidProject {
     def toFile(format: String, f: File):Boolean = ImageIO.write(r, format, f)
     def toFile(format: String, s: String):Boolean = toFile(format, new File(s))
     def toOutputStream(format: String, o: OutputStream) = ImageIO.write(r, format, o)
+  }
+}
+
+
+object DdmSupport {
+  private lazy val bridgeInit = {
+    AndroidDebugBridge.init(false)
+    Runtime.getRuntime().addShutdownHook(new Thread() { override def run() { AndroidDebugBridge.terminate() }})
   }
 }
