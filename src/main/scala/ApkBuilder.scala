@@ -14,7 +14,7 @@ import java.io.{ByteArrayOutputStream, File, PrintStream}
  * [[http://android.git.kernel.org/?p=platform/sdk.git;a=blob;f=anttasks/src/com/android/ant/ApkBuilderTask.java here]].
  */
 class ApkBuilder(project: Installable, debug: Boolean) {
-  
+
   val classLoader = ClasspathUtilities.toLoader(project.androidToolsPath / "lib" / "sdklib.jar")
   val klass = classLoader.loadClass("com.android.sdklib.build.ApkBuilder")
   val constructor = klass.getConstructor(
@@ -29,6 +29,7 @@ class ApkBuilder(project: Installable, debug: Boolean) {
     project.log.info("Packaging "+project.packageApkPath)
     addNativeLibraries(project.nativeLibrariesPath.asFile, null)
     addResourcesFromJar(project.classesMinJarPath.asFile)
+    addSourceFolder(project.mainResourcesPath.asFile)
     sealApk
     None
   } catch {
@@ -36,23 +37,23 @@ class ApkBuilder(project: Installable, debug: Boolean) {
   } finally {
     project.log.debug(outputStream.toString)
   }
-  
+
   def getDebugKeystore = {
     val method = klass.getMethod("getDebugKeystore")
     method.invoke(null).asInstanceOf[String]
   }
-  
+
   def setDebugMode(debug: Boolean) {
     val method = klass.getMethod("setDebugMode", classOf[Boolean])
     method.invoke(builder, debug.asInstanceOf[Object])
   }
-  
+
   def addNativeLibraries(nativeFolder: File, abiFilter: String) {
     if (nativeFolder.exists && nativeFolder.isDirectory) {
       val method = klass.getMethod("addNativeLibraries", classOf[File], classOf[String])
       method.invoke(builder, nativeFolder, abiFilter)
     }
-  } 
+  }
 
   /// Copy most non class files from the given standard java jar file
   ///
@@ -63,7 +64,15 @@ class ApkBuilder(project: Installable, debug: Boolean) {
       def method = klass.getMethod("addResourcesFromJar", classOf[File])
       method.invoke(builder, jarFile)
     }
-  }  
+  }
+
+  def addSourceFolder(folder: File) {
+    if (folder.exists) {
+      def method = klass.getMethod("addSourceFolder", classOf[File])
+      method.invoke(builder, folder)
+    }
+  }
+
 
   def sealApk() {
     val method = klass.getMethod("sealApk")
